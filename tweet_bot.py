@@ -46,7 +46,8 @@ img.save(img_path)
 
 # — Tweet it with media —
 tweet_text = f"2025 is {pct}% complete!"
-api.update_with_media(img_path, tweet_text)
+api.update_status(status=tweet_text, media_ids=[api.media_upload(img_path).media_id_string])
+
 
 # — Update state.json —
 state["last_pct"] = pct
