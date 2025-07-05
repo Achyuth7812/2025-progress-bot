@@ -37,7 +37,9 @@ draw.rectangle([20, 80, W-20, 120], outline="black", width=2)
 draw.rectangle([20, 80, 20+bar_w, 120], fill="skyblue")
 font = ImageFont.load_default()
 txt = f"2025 is {pct}% complete"
-w, h = draw.textsize(txt, font=font)
+bbox = draw.textbbox((0, 0), txt, font=font)
+w = bbox[2] - bbox[0]
+h = bbox[3] - bbox[1]
 draw.text(((W-w)/2, 30), txt, fill="black", font=font)
 img_path = "progress.png"
 img.save(img_path)
