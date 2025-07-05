@@ -1,8 +1,7 @@
 import os, json
 from datetime import date
-from PIL import Image, ImageDraw, ImageFont
-import tweepy
 from subprocess import run
+import tweepy
 
 # — Load Twitter creds from ENV —
 api_key     = os.environ["API_KEY"]
@@ -28,26 +27,11 @@ if pct <= state["last_pct"]:
     print(f"No increase (last={state['last_pct']}%, now={pct}%). Exiting.")
     exit(0)
 
-# — Generate a progress‑bar image —
-W, H = 800, 200
-bar_w = int((pct / 100) * (W - 40))
-img = Image.new("RGB", (W, H), color="white")
-draw = ImageDraw.Draw(img)
-draw.rectangle([20, 80, W-20, 120], outline="black", width=2)
-draw.rectangle([20, 80, 20+bar_w, 120], fill="skyblue")
-font = ImageFont.load_default()
-txt = f"2025 is {pct}% complete"
-bbox = draw.textbbox((0, 0), txt, font=font)
-w = bbox[2] - bbox[0]
-h = bbox[3] - bbox[1]
-draw.text(((W-w)/2, 30), txt, fill="black", font=font)
-img_path = "progress.png"
-img.save(img_path)
+# — Compose tweet text (emoji style) —
+tweet_text = f"📆 {today.strftime('%B %d, %Y')}\n🟦 2025 is {pct}% complete!\n⏳ Keep going! 💪✨"
 
-# — Tweet it with media —
-tweet_text = f"2025 is {pct}% complete!"
-api.update_status(status=tweet_text, media_ids=[api.media_upload(img_path).media_id_string])
-
+# — Send text-only tweet —
+api.update_status(status=tweet_text)
 
 # — Update state.json —
 state["last_pct"] = pct
@@ -57,12 +41,11 @@ with open("state.json", "w") as f:
 # — Commit & push changes back to GitHub —
 run(["git", "config", "user.name", "github-actions"])
 run(["git", "config", "user.email", "actions@github.com"])
-run(["git", "add", "state.json", "progress.png"])
+run(["git", "add", "state.json"])
 run([
     "git", "commit", "-m",
     f"Update to {pct}%"
 ])
-# Use the injected GITHUB_TOKEN to push:
 repo = os.environ["GITHUB_REPOSITORY"]
 run([
     "git", "push",
